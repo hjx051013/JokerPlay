@@ -1,6 +1,9 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include<string.h>
 #include "list.h"
 
-DLIST_S *listCreate(void)
+DLIST_S *listCreate(FREE_FUNC pfnFree)
 {
 	DLIST_S *pstDlist;
 
@@ -8,6 +11,7 @@ DLIST_S *listCreate(void)
 		return NULL;
 	pstDlist->head = pstDlist->tail = NULL;
 	pstDlist->len = 0;
+	pstDlist->free = pfnFree
 
 	return pstDlist;
 }
@@ -16,11 +20,11 @@ int listAddNodeHead(DLIST_S *pstDlist, void *pVal)
 {
 	LISTNODE_S *pstNode = NULL;
 
-	if((pstNode = (LISTNODE_S *)malloc(sizeof(LISTNODE_S)) == NULL)
+	if((pstNode = (LISTNODE_S *)malloc(sizeof(LISTNODE_S))) == NULL)
 		return OP_ERR;
 	pstNode->value = pVal;
 	if(pstDlist->len == 0) {
-		pstDlist->head = pstDlist->tail = node;
+		pstDlist->head = pstDlist->tail = pstNode;
 	} else {
 		pstNode->next = pstDlist->head;
 		pstNode->prev = NULL;
@@ -36,7 +40,7 @@ int lisAddNodeTail(DLIST_S *pstDlist, void *pVal)
 {
 	LISTNODE_S *pstNode = NULL;
 
-	if((pstNode = (LISTNODE_S *)malloc(sizeof(LISTNODE_S)) == NULL)
+	if((pstNode = (LISTNODE_S *)malloc(sizeof(LISTNODE_S))) == NULL)
 		return OP_ERR;
 	pstNode->value = pVal;
 	if(pstDlist->len == 0) {
@@ -101,4 +105,38 @@ LISTNODE_S *listNodeIndex(DLIST_S *pstDlist, uint32 index)
 
 	return pstCur;
 }
+/*
+struct Student {
+	char name[64];
+	char password[32];
+};
 
+int main(void) {
+	char name[64];
+	char password[32];
+	struct Student *tmpStudent = NULL;
+	int i, len;
+	LISTNODE_S *tmpNode;
+
+	DLIST_S *dlist = listCreate(free);
+	FILE *fp = fopen("/home/h50001839/codes/test.txt","rb");
+	while(fscanf(fp, "%s%s", name, password) != EOF) {
+		tmpStudent = (struct Student *)malloc(sizeof(struct Student));
+		strcpy(tmpStudent->name,name);
+		strcpy(tmpStudent->password, password);
+		listAddNodeHead(dlist, tmpStudent);
+	}
+
+	len = listLength(dlist);
+	for (i = 0; i < len; i++) {
+		tmpNode = listNodeIndex(dlist, i);
+		tmpStudent = (struct Student *)tmpNode->value;
+		printf("%s, %s\n", tmpStudent->name, tmpStudent->password);
+	}
+
+	listEmpty(dlist);
+	printf("listLen = %d\n", listLength(dlist));
+
+	return 0;
+}
+*/
