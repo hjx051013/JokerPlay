@@ -2,6 +2,8 @@
 #define __LIST_H__
 #include "basic.h"
 
+typedef void (*FREE_FUNC)(void *ptr);
+
 typedef struct tagListNode {
 	struct tagListNode *prev;
 	struct tagListNode *next;
@@ -21,11 +23,10 @@ typedef struct tagDlinkedList {
 #define listNextNode(n) ((n)->next)
 #define listNodeValue(n) ((n)->value)
 
-#define listSetFreeMethod(l,m) ((l)->free = (m))
 #define listGetFree(l) ((l)->free)
 
 
-DLIST_S *listCreate(void);
+DLIST_S *listCreate(FREE_FUNC pfnFree);
 int listAddNodeHead(DLIST_S *pstDlist, void *pVal);
 int lisAddNodeTail(DLIST_S *pstDlist, void *pVal);
 void listDelNode(DLIST_S *pstDlist, LISTNODE_S *pstNode);
