@@ -25,8 +25,8 @@ typedef enum tagMsgType {
 } MSG_TYPE_E;
 
 typedef struct tagMsgHead {
-	uint32 type;
-	uint32 msgLen;
+	uint32 uiType;
+	//uint32 uiMsgLen;
 } MSG_HEAD_S;
 
 typedef struct tagUserInfo {
@@ -34,10 +34,14 @@ typedef struct tagUserInfo {
 	char ascPwd[PWD_MAX_LEN];
 } USER_INFO_S;
 
+typedef struct tagRomInfo {
+	int uiMemberNum;
 
-FILE* userfp = NULL;
+} ROOM_INFO_S;
+FILE* g_pstUserfp = NULL;
+DLIST_S *g_stUserList = NULL;
 
-/* ÔÚefd¶Ôfd½øÐÐop²Ù×÷£¬ÆäÖÐfd¶ÔÓ¦µÄepoll_eventµÄevents×Ö¶ÎÎªevents */
+/* åœ¨efdå¯¹fdè¿›è¡Œopæ“ä½œï¼Œå…¶ä¸­fdå¯¹åº”çš„epoll_eventçš„eventså­—æ®µä¸ºevents */
 void updateEvents(int efd, int fd, int events, int op)
 {
     struct epoll_event ev;
@@ -77,11 +81,26 @@ void handleAccept(int efd, int lfd)
     updateEvents(efd, connfd, EPOLLIN, EPOLL_CTL_ADD);
 }
 
+void regisetrProc(int efd, int fd, MSG_HEAD_S *pstMsgHead)
+{
+
+}
 void handleRead(int efd, int fd)
 {
-    /*ÏÈ¶ÁÏûÏ¢Í·*/
+	MSG_HEAD_S stMsgHead;
 
-    /*ÔÙ¶ÁÏûÏ¢Ìå*/
+    /*å…ˆè¯»æ¶ˆæ¯å¤´*/
+	socketRecv(fd, &stMsgHead, sizeof(stMsgHead));
+
+	switch (stMsgHead.uiType) {
+		case REGISTER:
+			registerProc(efd, fd, &stMsgHead);
+			break;
+		default:
+			printf("message type error\n");
+			exit(1);
+	}
+    /*å†è¯»æ¶ˆæ¯ä½“*/
 
 }
 
@@ -99,7 +118,7 @@ int loopOnce(int efd, int lfd, int waitms)
             if(activeFd == lfd) {
                 handleAccept(efd, lfd);
             } else {
-                handleRead(efd, fd);
+                handleRead(efd, activeFd);
             }
         }
     }
@@ -117,13 +136,28 @@ int serverInit()
 {
 	int ret;
 	char buf[BUF_LEN];
+	char ascName[NAME_MAX_LEN];
+	char ascPwd[PWD_MAX_LEN];
+	USER_INFO_S *pstTmpUser;
 
-	userfp = fopen("/tmp/users.txt",a+);
-	exit_if(userfp==NULL);
+	g_stUserList = listCreate();
+	listSetFreeMethod(g_stUserList, free);
+	g_pstUserfp = fopen("/tmp/users.txt",a+b);
+	exit_if(g_pstUserfp==NULL);
+	while(fscanf("%s%s", ascName, ascPwd) != EOF) {
+		pstTmpUser = (USER_INFO_S *)malloc(sizeof(USER_INFO_S));
+		if (pstTmpUser == NULL) {
+			printf("malloc error\n");
+			return -1;
+		}
+		strcpy_s(pstTmpUser->ascName, ascName, NAME_MAX_LEN);
+		strcpy_s(pstTmpUser->ascPwd, ascPwd, PWD_MAX_LEN);
+		listAddNodeHead(pstTmpUser, (void *) pstTmpUser);
+	}
 
-
-
+	return 0;
 }
+
 int main(int argc, char *argv[])
 {
     char *optstr = "hi:p:";
@@ -172,3 +206,5 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
+
