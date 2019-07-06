@@ -8,7 +8,7 @@
 
 #define BACKLOG 200
 
-/*´´½¨Ò»¸ösocket£¬ÕìÌıpscAddr¼°port¶ÔÓ¦µÄipºÍ¶Ë¿Ú */
+/*åˆ›å»ºä¸€ä¸ªsocketï¼Œä¾¦å¬pscAddråŠportå¯¹åº”çš„ipå’Œç«¯å£ */
 int createSocketListen(int port, char *pscAddr)
 {
     int ret;
@@ -18,7 +18,7 @@ int createSocketListen(int port, char *pscAddr)
     bzero(&my_addr, sizeof(my_addr));
     my_addr.sin_family = AF_INET;
     my_addr.sin_port = htons(port);
-    ret = inet_pton(AF_INET, pscAddr, &(my_addr.sin_addr.s_addr)); /*½«ip×Ö·û´®×ª³Éstuct in_addrÀàĞÍ */
+    ret = inet_pton(AF_INET, pscAddr, &(my_addr.sin_addr.s_addr)); /*å°†ipå­—ç¬¦ä¸²è½¬æˆstuct in_addrç±»å‹ */
     exit_if(ret < 0);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     exit_if(sockfd < 0);
@@ -29,7 +29,7 @@ int createSocketListen(int port, char *pscAddr)
     return sockfd;
 }
 
-/*´Ófd¶Á³öuiBufLen¸ö×Ö½Úµ½pscBufÖĞ£¬Èç¹ûÊÕ²»µ½uiBufLen¸ö×Ö½Ú£¬ÓÉÓÚfd±»ÉèÖÃÎª·Ç×èÈû½«»á±¨´í */
+/*ä»fdè¯»å‡ºuiBufLenä¸ªå­—èŠ‚åˆ°pscBufä¸­ï¼Œå¦‚æœæ”¶ä¸åˆ°uiBufLenä¸ªå­—èŠ‚ï¼Œç”±äºfdè¢«è®¾ç½®ä¸ºéé˜»å¡å°†ä¼šæŠ¥é”™ */
 void socketRecv(int fd, char *pscBuf, int uiBufLen)
 {
     int recvedLen = 0;
@@ -49,5 +49,23 @@ void socketRecv(int fd, char *pscBuf, int uiBufLen)
         }
         recvedLen += recvTempLen;
     } while (recvedLen != bufLen);
+
+}
+
+void socketSend(int siFd, char *pscMsgBuf, uint32 uiBufLen)
+{
+	int siLenFill;/*ä¸€å…±è¦å‘é€çš„æ¶ˆæ¯å­—èŠ‚æ•°*/
+	int siLenSent;/*å·²å‘é€çš„æ¶ˆæ¯å­—èŠ‚æ•°*/
+	int siLenLeft;/*å‰©ä½™åº”è¯¥è¦å‘é€çš„æ¶ˆæ¯å­—èŠ‚æ•°*/
+	int siLen;
+
+	siLenFill = (int)uiBufLen;
+	do {
+		do {
+			siLen = send(siFd, pscMsgBuf + siLenSent, siLenLeft, 0);
+		} while((siLen == -1) && (errno == EINTR));
+		exit_if(siLen == -1);
+		siLenSent += siLen;
+	} while(siLenSent != siLenFill);
 
 }
