@@ -105,7 +105,7 @@ LISTNODE_S *listNodeIndex(DLIST_S *pstDlist, uint32 index)
 
 	return pstCur;
 }
-/*
+
 struct Student {
 	char name[64];
 	char password[32];
@@ -139,4 +139,3 @@ int main(void) {
 
 	return 0;
 }
-*/
